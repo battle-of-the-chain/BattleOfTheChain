@@ -15,7 +15,9 @@ enum MessageType {
     QUERY_ALL = 1,
     RESPONSE_BLOCKCHAIN = 2,
     QUERY_TRANSACTION_POOL = 3,
-    RESPONSE_TRANSACTION_POOL = 4
+    RESPONSE_TRANSACTION_POOL = 4,
+    QUERY_TRANSACTION_POOL_VICTORY_POINTS = 5,
+    RESPONSE_TRANSACTION_POOL_VICTORY_POINTS = 6
 }
 
 class Message {
@@ -82,6 +84,9 @@ const initMessageHandler = (ws: WebSocket) => {
                 case MessageType.QUERY_TRANSACTION_POOL:
                     write(ws, responseTransactionPoolMsg());
                     break;
+                case MessageType.QUERY_TRANSACTION_POOL_VICTORY_POINTS:
+                    write(ws, responseTransactionPoolVictoryPointsMsg());
+                    break;
                 case MessageType.RESPONSE_TRANSACTION_POOL:
                     const receivedTransactions: Transaction[] = JSONToObject<Transaction[]>(message.data);
                     if (receivedTransactions === null) {
@@ -94,12 +99,28 @@ const initMessageHandler = (ws: WebSocket) => {
                             // if no error is thrown, transaction was indeed added to the pool
                             // let's broadcast transaction pool
                             broadCastTransactionPool();
-                            broadCastTransactionPoolVictoryPoints();
                         } catch (e) {
                             console.log(e.message);
                         }
                     });
                     break;
+                    case MessageType.RESPONSE_TRANSACTION_POOL_VICTORY_POINTS:
+                        const receivedTransactionsVictoryPoints: Transaction[] = JSONToObject<Transaction[]>(message.data);
+                        if (receivedTransactionsVictoryPoints === null) {
+                            console.log('invalid transaction received: %s', JSON.stringify(message.data, null, 2));
+                            break;
+                        }
+                        receivedTransactionsVictoryPoints.forEach((transaction: Transaction) => {
+                            try {
+                                handleReceivedTransaction(transaction);
+                                // if no error is thrown, transaction was indeed added to the pool
+                                // let's broadcast transaction pool
+                                broadCastTransactionPoolVictoryPoints();
+                            } catch (e) {
+                                console.log(e.message);
+                            }
+                        });
+                        break;
             }
         } catch (e) {
             console.log(e);
@@ -129,7 +150,7 @@ const queryTransactionPoolMsg = (): Message => ({
 });
 
 const queryTransactionPoolVictoryPointsMsg = (): Message => ({
-    'type': MessageType.QUERY_TRANSACTION_POOL,
+    'type': MessageType.QUERY_TRANSACTION_POOL_VICTORY_POINTS,
     'data': null
 });
 
@@ -139,7 +160,7 @@ const responseTransactionPoolMsg = (): Message => ({
 });
 
 const responseTransactionPoolVictoryPointsMsg = (): Message => ({
-    'type': MessageType.RESPONSE_TRANSACTION_POOL,
+    'type': MessageType.RESPONSE_TRANSACTION_POOL_VICTORY_POINTS,
     'data': JSON.stringify(getTransactionPoolVictoryPoints())
 });
 
