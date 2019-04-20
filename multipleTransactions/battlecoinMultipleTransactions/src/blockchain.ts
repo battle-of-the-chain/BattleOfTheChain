@@ -66,8 +66,9 @@ let blockchain: Block[] = [genesisBlock];
 // the unspent txOut of genesis block is set to unspentTxOuts on startup
 let unspentTxOuts: UnspentTxOut[] = processTransactions(blockchain[0].data, [], 0);
 const getUnspentTxOuts = (): UnspentTxOut[] => _.cloneDeep(unspentTxOuts);
-
+console.log(blockchain[0].data);
 let unspentTxOutsVictoryPoints: UnspentTxOutVictoryPoints[] = processTransactionsVictoryPoints(blockchain[0].dataVictory,[],0);
+console.log(blockchain[0].dataVictory);
 const getUnspentTxOutsVictoryPoints = (): UnspentTxOutVictoryPoints[] => _.cloneDeep(unspentTxOutsVictoryPoints);
 
 const getBlockchain = (): Block[] => blockchain;
@@ -306,7 +307,7 @@ const hashMatchesDifficulty = (hash: string, difficulty: number): boolean => {
     PREVERI ALI JE PODAN BLOCKCHAIN VELJAVEN,
     ČE JA: VRNE NEPORABLJENE txOuts
  */
-const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
+const isValidChain = (blockchainToValidate: Block[]): any => {
     console.log('isValidChain:');
     console.log(JSON.stringify(blockchainToValidate));
     const isValidGenesis = (block: Block): boolean => {
@@ -334,7 +335,23 @@ const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
             return null;
         }
     }
-    return aUnspentTxOuts;
+
+    let aUnspentTxOutsVictoryPoints: UnspentTxOutVictoryPoints[] = [];
+
+    for (let i = 0; i < blockchainToValidate.length; i++) {
+        const currentBlock: Block = blockchainToValidate[i];
+        if (i !== 0 && !isValidNewBlock(blockchainToValidate[i], blockchainToValidate[i - 1])) {
+            return null;
+        }
+
+        aUnspentTxOutsVictoryPoints = processTransactions(currentBlock.dataVictory, aUnspentTxOutsVictoryPoints, currentBlock.index);
+        if (aUnspentTxOutsVictoryPoints === null) {
+            console.log('invalid transactions in blockchain');
+            return null;
+        }
+    }
+    let tupleUnspent = [aUnspentTxOuts, aUnspentTxOutsVictoryPoints];
+    return tupleUnspent;
 };
 
 /*
@@ -343,13 +360,17 @@ const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
 const addBlockToChain = (newBlock: Block): boolean => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const retVal: UnspentTxOut[] = processTransactions(newBlock.data, getUnspentTxOuts(), newBlock.index);
-        if (retVal === null) {
+        const retValVictoryPoints: UnspentTxOut[] = processTransactions(newBlock.dataVictory, getUnspentTxOutsVictoryPoints(), newBlock.index);
+
+        if (retVal === null || retValVictoryPoints == null) {
             console.log('block is not valid in terms of transactions');
             return false;
         } else {
             blockchain.push(newBlock);
             setUnspentTxOuts(retVal);
             updateTransactionPool(unspentTxOuts);
+            setUnspentTxOutsVictoryPoints(retValVictoryPoints);
+            updateTransactionPoolVictoryPoints(unspentTxOutsVictoryPoints);
             return true;
         }
     }
@@ -360,14 +381,18 @@ const addBlockToChain = (newBlock: Block): boolean => {
         ZAMENJAJ VERIGO ZA TISTO Z VIŠJO SKUPNO TEŽAVNOSTJO
 */
 const replaceChain = (newBlocks: Block[]) => {
-    const aUnspentTxOuts = isValidChain(newBlocks);
-    const validChain: boolean = aUnspentTxOuts !== null;
+    const tupleUnspent = isValidChain(newBlocks);
+    const aUnspentTxOuts = tupleUnspent[0];
+    const aUnspentTxOutsVictoryPoints = tupleUnspent[1];
+    const validChain: boolean = aUnspentTxOuts !== null && aUnspentTxOutsVictoryPoints !== null;
     if (validChain &&
         getAccumulatedDifficulty(newBlocks) > getAccumulatedDifficulty(getBlockchain())) {
         console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
         blockchain = newBlocks;
         setUnspentTxOuts(aUnspentTxOuts);
         updateTransactionPool(unspentTxOuts);
+        setUnspentTxOutsVictoryPoints(aUnspentTxOutsVictoryPoints);
+        updateTransactionPoolVictoryPoints(unspentTxOutsVictoryPoints);
         broadcastLatest();
     } else {
         console.log('Received blockchain invalid');
