@@ -403,10 +403,15 @@ const handleReceivedTransaction = (transaction: Transaction) => {
     addToTransactionPool(transaction, getUnspentTxOuts());
 };
 
+const handleReceivedTransactionVictoryPoints = (transaction: Transaction) => {
+    addToTransactionPoolVictoryPoints(transaction, getUnspentTxOuts());
+};
+
 export {
     Block, getBlockchain, getUnspentTxOuts, getLatestBlock, sendTransaction,
     generateRawNextBlock, generateNextBlock, generatenextBlockWithTransaction,
     handleReceivedTransaction, getMyUnspentTransactionOutputs,
     getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain,
-    getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints, getAccountBalanceVictoryPoints
+    getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints, getAccountBalanceVictoryPoints,
+    handleReceivedTransactionVictoryPoints
 };

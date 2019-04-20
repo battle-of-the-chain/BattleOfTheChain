@@ -2,7 +2,7 @@ import * as WebSocket from 'ws';
 import {Server} from 'ws';
 import {
     addBlockToChain, Block, getBlockchain, getLatestBlock, handleReceivedTransaction, isValidBlockStructure,
-    replaceChain
+    replaceChain, handleReceivedTransactionVictoryPoints
 } from './blockchain';
 import {Transaction} from './transaction';
 import {getTransactionPool} from './transactionPool';
@@ -112,7 +112,7 @@ const initMessageHandler = (ws: WebSocket) => {
                         }
                         receivedTransactionsVictoryPoints.forEach((transaction: Transaction) => {
                             try {
-                                handleReceivedTransaction(transaction);
+                                handleReceivedTransactionVictoryPoints(transaction);
                                 // if no error is thrown, transaction was indeed added to the pool
                                 // let's broadcast transaction pool
                                 broadCastTransactionPoolVictoryPoints();
