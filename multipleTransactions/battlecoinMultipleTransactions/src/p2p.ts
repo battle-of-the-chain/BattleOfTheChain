@@ -94,6 +94,7 @@ const initMessageHandler = (ws: WebSocket) => {
                             // if no error is thrown, transaction was indeed added to the pool
                             // let's broadcast transaction pool
                             broadCastTransactionPool();
+                            broadCastTransactionPoolVictoryPoints();
                         } catch (e) {
                             console.log(e.message);
                         }
@@ -123,6 +124,11 @@ const responseLatestMsg = (): Message => ({
 });
 
 const queryTransactionPoolMsg = (): Message => ({
+    'type': MessageType.QUERY_TRANSACTION_POOL,
+    'data': null
+});
+
+const queryTransactionPoolVictoryPointsMsg = (): Message => ({
     'type': MessageType.QUERY_TRANSACTION_POOL,
     'data': null
 });
@@ -195,6 +201,6 @@ const broadCastTransactionPool = () => {
 };
 
 const broadCastTransactionPoolVictoryPoints = () => {
-    broadcast(responseTransactionPoolMsg());
+    broadcast(responseTransactionPoolVictoryPointsMsg());
 };
 export {connectToPeers, broadcastLatest, broadCastTransactionPool, initP2PServer, getSockets, broadCastTransactionPoolVictoryPoints};

@@ -65,14 +65,16 @@ let blockchain: Block[] = [genesisBlock];
 
 // the unspent txOut of genesis block is set to unspentTxOuts on startup
 let unspentTxOuts: UnspentTxOut[] = processTransactions(blockchain[0].data, [], 0);
+const getUnspentTxOuts = (): UnspentTxOut[] => _.cloneDeep(unspentTxOuts);
 
 let unspentTxOutsVictoryPoints: UnspentTxOutVictoryPoints[] = processTransactionsVictoryPoints(blockchain[0].dataVictory,[],0);
+const getUnspentTxOutsVictoryPoints = (): UnspentTxOutVictoryPoints[] => _.cloneDeep(unspentTxOutsVictoryPoints);
 
 const getBlockchain = (): Block[] => blockchain;
 
-const getUnspentTxOuts = (): UnspentTxOut[] => _.cloneDeep(unspentTxOuts);
 
-const getUnspentTxOutsVictoryPoints = (): UnspentTxOutVictoryPoints[] => _.cloneDeep(unspentTxOutsVictoryPoints);
+
+
 
 // and txPool should be only updated at the same time
 const setUnspentTxOuts = (newUnspentTxOut: UnspentTxOut[]) => {
