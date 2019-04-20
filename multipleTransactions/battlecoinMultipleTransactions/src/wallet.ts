@@ -114,7 +114,7 @@ const findTxOutsForAmountVictoryPoints = (amount: number, myUnspentTxOuts: Unspe
     }
 
     const eMsg = 'Cannot create transaction from the available unspent transaction outputs.' +
-        ' Required amount:' + amount + '. Available unspentTxOuts:' + JSON.stringify(myUnspentTxOuts);
+        ' Required amount:' + amount + '. Available unspentTxOuts:' + JSON.stringify(myUnspentTxOuts)+"JEJHATA";
     throw Error(eMsg);
 };
 

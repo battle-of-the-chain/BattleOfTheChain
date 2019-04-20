@@ -31,7 +31,7 @@ class Block {
         this.previousHash = previousHash;
         this.timestamp = timestamp;
         this.data = data;
-        this.data = dataVictory;
+        this.dataVictory = dataVictory;
         this.hash = hash;
         this.difficulty = difficulty;
         this.nonce = nonce;
@@ -149,6 +149,10 @@ const getMyUnspentTransactionOutputs = () => {
     return findUnspentTxOuts(getPublicFromWallet(), getUnspentTxOuts());
 };
 
+const getMyUnspentTransactionOutputsVictoryPoints = () => {
+    return findUnspentTxOutsVictoryPoints(getPublicFromWallet(), getUnspentTxOutsVictoryPoints());
+};
+
 //USTVARI NASLEDNJI BLOCK S PREMOŽENJEM(VALUTO)
 const generateNextBlock = () => {
     const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1);
@@ -159,6 +163,7 @@ const generateNextBlock = () => {
 };
 
 //USTVARI NASLEDNJI BLOCK S TRANSAKCIJO
+//MOGOČE JE POTREBNO LOČITI NA DVE FUNKCIJI (ENA ZA VICTORY, ENA ZA CURRENCY)
 const generatenextBlockWithTransaction = (receiverAddress: string, amount: number) => {
     if (!isValidAddress(receiverAddress)) {
         throw Error('invalid address');
@@ -375,5 +380,6 @@ export {
     Block, getBlockchain, getUnspentTxOuts, getLatestBlock, sendTransaction,
     generateRawNextBlock, generateNextBlock, generatenextBlockWithTransaction,
     handleReceivedTransaction, getMyUnspentTransactionOutputs,
-    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain
+    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain,
+    getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints, getAccountBalanceVictoryPoints
 };

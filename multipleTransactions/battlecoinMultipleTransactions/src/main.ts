@@ -3,7 +3,9 @@ import * as express from 'express';
 
 import {
     Block, generateNextBlock, generatenextBlockWithTransaction, generateRawNextBlock, getAccountBalance,
-    getBlockchain, getMyUnspentTransactionOutputs, getUnspentTxOuts, sendTransaction
+    getBlockchain, getMyUnspentTransactionOutputs, getUnspentTxOuts, sendTransaction,
+    getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints,
+    getAccountBalanceVictoryPoints
 } from './blockchain';
 import {connectToPeers, getSockets, initP2PServer} from './p2p';
 import {getTransactionPool} from './transactionPool';
@@ -27,12 +29,33 @@ const initHttpServer = (myHttpPort: number) => {
         res.send(JSON.stringify(getBlockchain(), null, 2));
     });
 
+    /*
+        CURRENCY
+    */
     app.get('/unspentTransactionOutputs', (req, res) => {
         res.send(getUnspentTxOuts());
     });
 
+    /*
+        VICTORY
+    */
+    app.get('/unspentTransactionOutputsVictoryPoints', (req, res) => {
+        res.send(getUnspentTxOutsVictoryPoints());
+    });
+
+
+    /*
+        CURRENCY
+    */
     app.get('/myUnspentTransactionOutputs', (req, res) => {
         res.send(getMyUnspentTransactionOutputs());
+    });
+
+    /*
+        VICTORY
+    */
+    app.get('/myUnspentTransactionOutputsVictory', (req, res) => {
+        res.send(getMyUnspentTransactionOutputsVictoryPoints());
     });
 
     app.post('/mineRawBlock', (req, res) => {
@@ -57,8 +80,19 @@ const initHttpServer = (myHttpPort: number) => {
         }
     });
 
+    /*
+      CURRENCY
+    */
     app.get('/balance', (req, res) => {
         const balance: number = getAccountBalance();
+        res.send({'balance': balance});
+    });
+
+    /*
+      VICTORY
+    */
+    app.get('/balanceVictoryPoints', (req, res) => {
+        const balance: number = getAccountBalanceVictoryPoints();
         res.send({'balance': balance});
     });
 
@@ -79,6 +113,9 @@ const initHttpServer = (myHttpPort: number) => {
         }
     });
 
+    /*
+      CURRENCY
+    */
     app.post('/sendTransaction', (req, res) => {
         try {
             const address = req.body.address;
@@ -95,8 +132,37 @@ const initHttpServer = (myHttpPort: number) => {
         }
     });
 
+    /*
+      VICTORY
+    */
+    app.post('/sendTransactionVictoryPoints', (req, res) => {
+        try {
+            const address = req.body.address;
+            const amount = req.body.amount;
+
+            if (address === undefined || amount === undefined) {
+                throw Error('invalid address or amount');
+            }
+            const resp = sendTransactionVictoryPoints(address, amount);
+            res.send(resp);
+        } catch (e) {
+            console.log(e.message);
+            res.status(400).send(e.message);
+        }
+    });
+
+    /*
+        CURRENCY
+    */
     app.get('/transactionPool', (req, res) => {
         res.send(getTransactionPool());
+    });
+
+    /*
+        VICTORY
+    */
+    app.get('/transactionPoolVictoryPoints', (req, res) => {
+        res.send(getTransactionPoolVictoryPoints());
     });
 
     app.get('/peers', (req, res) => {
