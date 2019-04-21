@@ -28,6 +28,7 @@ const generatePrivateKey = (): string => {
 const initWallet = () => {
     // let's not override existing private keys
     if (existsSync(privateKeyLocation)) {
+        console.log("You already have a private key, so none created");
         return;
     }
     const newPrivateKey = generatePrivateKey();
@@ -46,6 +47,10 @@ const deleteWallet = () => {
       BALANCE ZA CURRENCY
 */
 const getBalance = (address: string, unspentTxOuts: UnspentTxOut[]): number => {
+    console.log("Address: "+ address+ "Uspent txOuts" + JSON.stringify(unspentTxOuts,null,2));
+    console.log(_(findUnspentTxOuts(address, unspentTxOuts))
+        .map((uTxO: UnspentTxOut) => uTxO.amount)
+        .sum());
     return _(findUnspentTxOuts(address, unspentTxOuts))
         .map((uTxO: UnspentTxOut) => uTxO.amount)
         .sum();
@@ -55,6 +60,10 @@ const getBalance = (address: string, unspentTxOuts: UnspentTxOut[]): number => {
       BALANCE ZA VICTORY POINTS
 */
 const getBalanceVictoryPoints = (address: string, unspentTxOuts: UnspentTxOutVictoryPoints[]): number => {
+  console.log("Address: "+ address+ "Uspent txOuts" + JSON.stringify(unspentTxOuts,null,2));
+  console.log(_(findUnspentTxOutsVictoryPoints(address, unspentTxOuts))
+      .map((uTxO: UnspentTxOutVictoryPoints) => uTxO.amount)
+      .sum());
     return _(findUnspentTxOutsVictoryPoints(address, unspentTxOuts))
         .map((uTxO: UnspentTxOutVictoryPoints) => uTxO.amount)
         .sum();
@@ -114,7 +123,7 @@ const findTxOutsForAmountVictoryPoints = (amount: number, myUnspentTxOuts: Unspe
     }
 
     const eMsg = 'Cannot create transaction from the available unspent transaction outputs.' +
-        ' Required amount:' + amount + '. Available unspentTxOuts:' + JSON.stringify(myUnspentTxOuts)+"JEJHATA";
+        ' Required amount:' + amount + '. Available unspentTxOuts:' + JSON.stringify(myUnspentTxOuts);
     throw Error(eMsg);
 };
 

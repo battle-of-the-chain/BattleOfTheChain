@@ -259,6 +259,7 @@ const getCoinbaseTransactionVictoryPoints = (address: string, blockIndex: number
 
     t.txIns = [txIn];
     t.txOuts = [new TxOutVictoryPoints(address, COINBASE_AMOUNT_VICTORY_POINTS)];
+    console.log("GET COINBASE TRANSACTION VICTORY POINTS"+ JSON.stringify(t, null,2));
     t.id = getTransactionIdVictoryPoints(t);
     return t;
 };
@@ -313,13 +314,15 @@ const updateUnspentTxOutsVictoryPoints = (aTransactions: TransactionVictoryPoint
         .map((txIn) => new UnspentTxOutVictoryPoints(txIn.txOutId, txIn.txOutIndex, '', 0));
 
     /*
-            NOVE PREOSTALE NEPOTJENE TRANSAKCIJE
+            NOVE PREOSTALE NEPOTRJENE TRANSAKCIJE
     */
     const resultingUnspentTxOuts = aUnspentTxOuts
         .filter(((uTxO) => !findUnspentTxOutVictoryPoints(uTxO.txOutId, uTxO.txOutIndex, consumedTxOuts)))
         .concat(newUnspentTxOuts);
 
-    return resultingUnspentTxOuts;
+    console.log("resultingUnspentTxOuts: "+ JSON.stringify(resultingUnspentTxOuts, null, 2));
+
+    return resultingUnspentTxOuts;   //TU SE ZAMENJA KOT JE TREBA (VRAČA PRAVILEN REZULTAT)
 };
 
 const processTransactionsVictoryPoints = (aTransactions: TransactionVictoryPoints[], aUnspentTxOuts: UnspentTxOutVictoryPoints[], blockIndex: number) => {

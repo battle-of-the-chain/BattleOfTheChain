@@ -8,9 +8,11 @@ import {
     getAccountBalanceVictoryPoints
 } from './blockchain';
 import {connectToPeers, getSockets, initP2PServer} from './p2p';
+import {UnspentTxOut} from './transaction';
 import {getTransactionPool} from './transactionPool';
 import {getTransactionPoolVictoryPoints} from './transactionPoolVictoryPoints';
 import {getPublicFromWallet, initWallet} from './wallet';
+import * as _ from 'lodash';
 
 const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
 const p2pPort: number = parseInt(process.env.P2P_PORT) || 6001;
@@ -27,6 +29,20 @@ const initHttpServer = (myHttpPort: number) => {
 
     app.get('/blocks', (req, res) => {
         res.send(JSON.stringify(getBlockchain(), null, 2));
+    });
+
+    app.get('/transaction/:id', (req, res) => {
+        const tx = _(getBlockchain())
+            .map((blocks) => blocks.data)
+            .flatten()
+            .find({'id': req.params.id});
+        res.send(tx);
+    });
+
+    app.get('/address/:address', (req, res) => {
+        const unspentTxOuts: UnspentTxOut[] =
+            _.filter(getUnspentTxOuts(), (uTxO) => uTxO.address === req.params.address);
+        res.send({'unspentTxOuts': unspentTxOuts});
     });
 
     /*
@@ -61,6 +77,10 @@ const initHttpServer = (myHttpPort: number) => {
     app.post('/mineRawBlock', (req, res) => {
         if (req.body.data == null) {
             res.send('data parameter is missing');
+            return;
+        }
+        if (req.body.dataVictory == null) {
+            res.send('dataVictory parameter is missing');
             return;
         }
         const newBlock: Block = generateRawNextBlock(req.body.data, req.body.dataVictory);

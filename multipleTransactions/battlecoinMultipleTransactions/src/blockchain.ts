@@ -73,19 +73,20 @@ const getUnspentTxOutsVictoryPoints = (): UnspentTxOutVictoryPoints[] => _.clone
 
 const getBlockchain = (): Block[] => blockchain;
 
-
+console.log("UnspentTxOuts on startup" +JSON.stringify(getUnspentTxOuts(),null,2));
+console.log("unspentTxOutsVictoryPoints on startup" +JSON.stringify(getUnspentTxOutsVictoryPoints(),null,2));
 
 
 
 // and txPool should be only updated at the same time
 const setUnspentTxOuts = (newUnspentTxOut: UnspentTxOut[]) => {
-    console.log('replacing unspentTxouts with: %s', newUnspentTxOut);
+    console.log('replacing unspentTxouts with: %s', JSON.stringify(newUnspentTxOut,null,2));
     unspentTxOuts = newUnspentTxOut;
 };
 
 const setUnspentTxOutsVictoryPoints = (newUnspentTxOut: UnspentTxOutVictoryPoints[]) => {
-    console.log('replacing unspentTxouts with: %s', newUnspentTxOut);
-    unspentTxOuts = newUnspentTxOut;
+    console.log('replacing unspentTxouts with: %s', JSON.stringify(newUnspentTxOut,null,2));
+    unspentTxOutsVictoryPoints = newUnspentTxOut;
 };
 
 
@@ -131,7 +132,7 @@ const getAdjustedDifficulty = (latestBlock: Block, aBlockchain: Block[]) => {
 
 const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000);
 
-//USTVARI NASLEDDNJI BLOCK BREZ PREMOŽENJA(VALUTE)
+
 const generateRawNextBlock = (blockData: Transaction[], blockDataVictory: TransactionVictoryPoints[]) => {
     const previousBlock: Block = getLatestBlock();
     const difficulty: number = getDifficulty(getBlockchain());
@@ -158,10 +159,17 @@ const getMyUnspentTransactionOutputsVictoryPoints = () => {
 
 //USTVARI NASLEDNJI BLOCK S PREMOŽENJEM(VALUTO)
 const generateNextBlock = () => {
+    console.log("Inside generateNextBlock");
     const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1);
+    console.log("COINBASE TX" + JSON.stringify(coinbaseTx, null, 2));
     const blockData: Transaction[] = [coinbaseTx].concat(getTransactionPool());
+    console.log("blockData" + JSON.stringify(blockData, null, 2));
     const coinbaseTxVictoryPoints: TransactionVictoryPoints = getCoinbaseTransactionVictoryPoints(getPublicFromWallet(), getLatestBlock().index + 1);
+    console.log("COINBASE TX VICTORY" + JSON.stringify(coinbaseTxVictoryPoints, null, 2));
     const blockDataVictoryPoints: TransactionVictoryPoints[] = [coinbaseTxVictoryPoints].concat(getTransactionPoolVictoryPoints());
+    console.log("blockDataVictory" + JSON.stringify(blockDataVictoryPoints, null, 2));
+    console.log("transactionPoolVictoryPoints:" + JSON.stringify(getTransactionPoolVictoryPoints(), null, 2));
+        console.log("transactionPool:" + JSON.stringify(getTransactionPool(), null, 2));
     return generateRawNextBlock(blockData, blockDataVictoryPoints);
 };
 
@@ -344,7 +352,8 @@ const isValidChain = (blockchainToValidate: Block[]): any => {
             return null;
         }
 
-        aUnspentTxOutsVictoryPoints = processTransactions(currentBlock.dataVictory, aUnspentTxOutsVictoryPoints, currentBlock.index);
+        aUnspentTxOutsVictoryPoints = processTransactionsVictoryPoints(currentBlock.dataVictory, aUnspentTxOutsVictoryPoints, currentBlock.index);
+        console.log("aUnspentTxOutsVictoryPoints: " + JSON.stringify(aUnspentTxOutsVictoryPoints,null,2));
         if (aUnspentTxOutsVictoryPoints === null) {
             console.log('invalid transactions in blockchain');
             return null;
@@ -360,7 +369,7 @@ const isValidChain = (blockchainToValidate: Block[]): any => {
 const addBlockToChain = (newBlock: Block): boolean => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const retVal: UnspentTxOut[] = processTransactions(newBlock.data, getUnspentTxOuts(), newBlock.index);
-        const retValVictoryPoints: UnspentTxOut[] = processTransactions(newBlock.dataVictory, getUnspentTxOutsVictoryPoints(), newBlock.index);
+        const retValVictoryPoints: UnspentTxOut[] = processTransactionsVictoryPoints(newBlock.dataVictory, getUnspentTxOutsVictoryPoints(), newBlock.index);
 
         if (retVal === null || retValVictoryPoints == null) {
             console.log('block is not valid in terms of transactions');
