@@ -20,10 +20,16 @@ curl -X POST http://localhost:3001/mineBlock
 ```
 curl -H "Content-type: application/json" --data '{"address": "04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534b", "amount" : 35}' http://localhost:3001/sendTransaction
 ```
+```
+curl -H "Content-type: application/json" --data '{"address": "04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534b", "amount" : 35}' http://localhost:3001/sendTransactionVictoryPoints
+```
 
 ##### Query transaction pool
 ```
 curl http://localhost:3001/transactionPool
+```
+```
+curl http://localhost:3001/transactionPoolVictoryPoints
 ```
 
 ##### Mine transaction
@@ -34,6 +40,9 @@ curl -H "Content-type: application/json" --data '{"address": "04bfcab8722991ae77
 ##### Get balance
 ```
 curl http://localhost:3001/balance
+```
+```
+curl http://localhost:3001/balanceVictoryPoints
 ```
 
 #### Query information about a specific address
