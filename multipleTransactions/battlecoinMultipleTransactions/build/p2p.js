@@ -4,7 +4,21 @@ const WebSocket = require("ws");
 const blockchain_1 = require("./blockchain");
 const transactionPool_1 = require("./transactionPool");
 const transactionPoolVictoryPoints_1 = require("./transactionPoolVictoryPoints");
+const main_1 = require("./main");
+//GLOBALS
 const sockets = [];
+var potential_chain;
+var consentNum = 0;
+var consentReceived = 0;
+var masterSocket;
+var consent = false;
+const setMasterSocket = () => {
+    var socket = 'ws://localhost:' + main_1.getMaster();
+    console.log("Ayy: " + socket);
+    masterSocket = new WebSocket(socket);
+};
+exports.setMasterSocket = setMasterSocket;
+//_______
 var MessageType;
 (function (MessageType) {
     MessageType[MessageType["QUERY_LATEST"] = 0] = "QUERY_LATEST";
@@ -12,6 +26,8 @@ var MessageType;
     MessageType[MessageType["RESPONSE_BLOCKCHAIN"] = 2] = "RESPONSE_BLOCKCHAIN";
     MessageType[MessageType["QUERY_TRANSACTION_POOL"] = 3] = "QUERY_TRANSACTION_POOL";
     MessageType[MessageType["RESPONSE_TRANSACTION_POOL"] = 4] = "RESPONSE_TRANSACTION_POOL";
+    MessageType[MessageType["QUERY_TRANSACTION_POOL_VICTORY_POINTS"] = 5] = "QUERY_TRANSACTION_POOL_VICTORY_POINTS";
+    MessageType[MessageType["RESPONSE_TRANSACTION_POOL_VICTORY_POINTS"] = 6] = "RESPONSE_TRANSACTION_POOL_VICTORY_POINTS";
 })(MessageType || (MessageType = {}));
 class Message {
 }
@@ -71,6 +87,9 @@ const initMessageHandler = (ws) => {
                 case MessageType.QUERY_TRANSACTION_POOL:
                     write(ws, responseTransactionPoolMsg());
                     break;
+                case MessageType.QUERY_TRANSACTION_POOL_VICTORY_POINTS:
+                    write(ws, responseTransactionPoolVictoryPointsMsg());
+                    break;
                 case MessageType.RESPONSE_TRANSACTION_POOL:
                     const receivedTransactions = JSONToObject(message.data);
                     if (receivedTransactions === null) {
@@ -83,6 +102,24 @@ const initMessageHandler = (ws) => {
                             // if no error is thrown, transaction was indeed added to the pool
                             // let's broadcast transaction pool
                             broadCastTransactionPool();
+                        }
+                        catch (e) {
+                            console.log(e.message);
+                        }
+                    });
+                    break;
+                case MessageType.RESPONSE_TRANSACTION_POOL_VICTORY_POINTS:
+                    const receivedTransactionsVictoryPoints = JSONToObject(message.data);
+                    if (receivedTransactionsVictoryPoints === null) {
+                        console.log('invalid transaction received: %s', JSON.stringify(message.data, null, 2));
+                        break;
+                    }
+                    receivedTransactionsVictoryPoints.forEach((transaction) => {
+                        try {
+                            blockchain_1.handleReceivedTransactionVictoryPoints(transaction);
+                            // if no error is thrown, transaction was indeed added to the pool
+                            // let's broadcast transaction pool
+                            broadCastTransactionPoolVictoryPoints();
                         }
                         catch (e) {
                             console.log(e.message);
@@ -111,12 +148,16 @@ const queryTransactionPoolMsg = () => ({
     'type': MessageType.QUERY_TRANSACTION_POOL,
     'data': null
 });
+const queryTransactionPoolVictoryPointsMsg = () => ({
+    'type': MessageType.QUERY_TRANSACTION_POOL_VICTORY_POINTS,
+    'data': null
+});
 const responseTransactionPoolMsg = () => ({
     'type': MessageType.RESPONSE_TRANSACTION_POOL,
     'data': JSON.stringify(transactionPool_1.getTransactionPool())
 });
 const responseTransactionPoolVictoryPointsMsg = () => ({
-    'type': MessageType.RESPONSE_TRANSACTION_POOL,
+    'type': MessageType.RESPONSE_TRANSACTION_POOL_VICTORY_POINTS,
     'data': JSON.stringify(transactionPoolVictoryPoints_1.getTransactionPoolVictoryPoints())
 });
 const initErrorHandler = (ws) => {
@@ -152,7 +193,7 @@ const handleBlockchainResponse = (receivedBlocks) => {
         }
         else {
             console.log('Received blockchain is longer than current blockchain');
-            blockchain_1.replaceChain(receivedBlocks);
+            blockchain_1.replaceChainWithoutDifficulty(receivedBlocks);
         }
     }
     else {
@@ -178,7 +219,7 @@ const broadCastTransactionPool = () => {
 };
 exports.broadCastTransactionPool = broadCastTransactionPool;
 const broadCastTransactionPoolVictoryPoints = () => {
-    broadcast(responseTransactionPoolMsg());
+    broadcast(responseTransactionPoolVictoryPointsMsg());
 };
 exports.broadCastTransactionPoolVictoryPoints = broadCastTransactionPoolVictoryPoints;
 //# sourceMappingURL=p2p.js.map

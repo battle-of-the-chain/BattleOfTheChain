@@ -22,19 +22,16 @@ class Block {
     public timestamp: number;
     public data: Transaction[];
     public dataVictory: TransactionVictoryPoints[];
-    public difficulty: number;
-    public nonce: number;
 
     constructor(index: number, hash: string, previousHash: string,
-                timestamp: number, data: Transaction[], dataVictory: TransactionVictoryPoints[], difficulty: number, nonce: number) {
+                timestamp: number, data: Transaction[], dataVictory: TransactionVictoryPoints[]) {
         this.index = index;
         this.previousHash = previousHash;
         this.timestamp = timestamp;
         this.data = data;
         this.dataVictory = dataVictory;
         this.hash = hash;
-        this.difficulty = difficulty;
-        this.nonce = nonce;
+
     }
 }
 
@@ -57,7 +54,7 @@ const genesisTransactionVictoryPoints = {
 };
 //USTAVARI ZAČETNI BLOCK (GENESIS)
 const genesisBlock: Block = new Block(
-    0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', 1465154705, [genesisTransaction],[genesisTransactionVictoryPoints], 0, 0
+    0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', 1465154705, [genesisTransaction],[genesisTransactionVictoryPoints]
 );
 
 //USTVARI BLOCKCHAIN
@@ -67,6 +64,7 @@ let blockchain: Block[] = [genesisBlock];
 let unspentTxOuts: UnspentTxOut[] = processTransactions(blockchain[0].data, [], 0);
 const getUnspentTxOuts = (): UnspentTxOut[] => _.cloneDeep(unspentTxOuts);
 console.log(blockchain[0].data);
+
 let unspentTxOutsVictoryPoints: UnspentTxOutVictoryPoints[] = processTransactionsVictoryPoints(blockchain[0].dataVictory,[],0);
 console.log(blockchain[0].dataVictory);
 const getUnspentTxOutsVictoryPoints = (): UnspentTxOutVictoryPoints[] => _.cloneDeep(unspentTxOutsVictoryPoints);
@@ -85,7 +83,7 @@ const setUnspentTxOuts = (newUnspentTxOut: UnspentTxOut[]) => {
 };
 
 const setUnspentTxOutsVictoryPoints = (newUnspentTxOut: UnspentTxOutVictoryPoints[]) => {
-    console.log('replacing unspentTxouts with: %s', JSON.stringify(newUnspentTxOut,null,2));
+    console.log('replacing unspentTxOutsVictoryPoints with: %s', JSON.stringify(newUnspentTxOut,null,2));
     unspentTxOutsVictoryPoints = newUnspentTxOut;
 };
 
@@ -105,40 +103,18 @@ const BLOCK_GENERATION_INTERVAL: number = 10;
 */
 const DIFFICULTY_ADJUSTMENT_INTERVAL: number = 10;
 
-/*
-      PRIDOBI TEŽAVNOST, ČE JE POTREBNO KLIČE FUNKCIJO ZA PRILAGADOTIVE TEŽAVNOSTI
-*/
-const getDifficulty = (aBlockchain: Block[]): number => {
-    const latestBlock: Block = aBlockchain[blockchain.length - 1];
-    if (latestBlock.index % DIFFICULTY_ADJUSTMENT_INTERVAL === 0 && latestBlock.index !== 0) {
-        return getAdjustedDifficulty(latestBlock, aBlockchain);
-    } else {
-        return latestBlock.difficulty;
-    }
-};
 
-const getAdjustedDifficulty = (latestBlock: Block, aBlockchain: Block[]) => {
-    const prevAdjustmentBlock: Block = aBlockchain[blockchain.length - DIFFICULTY_ADJUSTMENT_INTERVAL];
-    const timeExpected: number = BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL;
-    const timeTaken: number = latestBlock.timestamp - prevAdjustmentBlock.timestamp;
-    if (timeTaken < timeExpected / 2) {
-        return prevAdjustmentBlock.difficulty + 1;
-    } else if (timeTaken > timeExpected * 2) {
-        return prevAdjustmentBlock.difficulty - 1;
-    } else {
-        return prevAdjustmentBlock.difficulty;
-    }
-};
+
+
 
 const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000);
 
 
 const generateRawNextBlock = (blockData: Transaction[], blockDataVictory: TransactionVictoryPoints[]) => {
     const previousBlock: Block = getLatestBlock();
-    const difficulty: number = getDifficulty(getBlockchain());
     const nextIndex: number = previousBlock.index + 1;
     const nextTimestamp: number = getCurrentTimestamp();
-    const newBlock: Block = findBlock(nextIndex, previousBlock.hash, nextTimestamp, blockData, blockDataVictory, difficulty);
+    const newBlock: Block = createBlockWithoutDifficulty(nextIndex, previousBlock.hash, nextTimestamp, blockData, blockDataVictory);
     if (addBlockToChain(newBlock)) {
         broadcastLatest();
         return newBlock;
@@ -191,19 +167,13 @@ const generatenextBlockWithTransaction = (receiverAddress: string, amount: numbe
     return generateRawNextBlock(blockData, blockDataVictoryPoints);
 };
 
-/*
-        POIŠČE VELJAVEN BLOCK
-        povečuje nonce, dokler ne pride do ustreznega hasha glede na difficulty
-*/
-const findBlock = (index: number, previousHash: string, timestamp: number, data: Transaction[], dataVictory: TransactionVictoryPoints[], difficulty: number): Block => {
-    let nonce = 0;
-    while (true) {
-        const hash: string = calculateHash(index, previousHash, timestamp, data, dataVictory, difficulty, nonce);
-        if (hashMatchesDifficulty(hash, difficulty)) {
-            return new Block(index, hash, previousHash, timestamp, data, dataVictory, difficulty, nonce);
-        }
-        nonce++;
-    }
+
+
+
+const createBlockWithoutDifficulty = (index: number, previousHash: string, timestamp: number, data: Transaction[], dataVictory: TransactionVictoryPoints[]): Block => {
+    let hash = calculateHashWithoutDifficulty(index,previousHash,timestamp,data,dataVictory);
+    return new Block(index, hash, previousHash, timestamp, data, dataVictory);
+
 };
 
 const getAccountBalance = (): number => {
@@ -228,12 +198,16 @@ const sendTransactionVictoryPoints = (address: string, amount: number): Transact
     return tx;
 };
 
-const calculateHashForBlock = (block: Block): string =>
-    calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.dataVictory, block.difficulty, block.nonce);
 
-const calculateHash = (index: number, previousHash: string, timestamp: number, data: Transaction[],dataVictory: TransactionVictoryPoints[],
-                       difficulty: number, nonce: number): string =>
-    CryptoJS.SHA256(index + previousHash + timestamp + data + dataVictory+ difficulty + nonce).toString();
+
+const calculateHashForBlockWithoutDifficulty = (block: Block): string =>
+    calculateHashWithoutDifficulty(block.index, block.previousHash, block.timestamp, block.data, block.dataVictory);
+
+const calculateHashWithoutDifficulty = (index: number, previousHash: string, timestamp: number, data: Transaction[],dataVictory: TransactionVictoryPoints[]): string =>
+    CryptoJS.SHA256(index + previousHash + timestamp + data + dataVictory ).toString();
+
+
+
 
 const isValidBlockStructure = (block: Block): boolean => {
     return typeof block.index === 'number'
@@ -258,21 +232,13 @@ const isValidNewBlock = (newBlock: Block, previousBlock: Block): boolean => {
     } else if (!isValidTimestamp(newBlock, previousBlock)) {
         console.log('invalid timestamp');
         return false;
-    } else if (!hasValidHash(newBlock)) {
+    } else if (!hasValidHashWithoutDifficulty(newBlock)) {
         return false;
     }
     return true;
 };
 
-/*
-        IZRAČUNA SKUPNO TEŽAVNOST ZA BLOCKCHAIN
-*/
-const getAccumulatedDifficulty = (aBlockchain: Block[]): number => {
-    return aBlockchain
-        .map((block) => block.difficulty)
-        .map((difficulty) => Math.pow(2, difficulty))
-        .reduce((a, b) => a + b);
-};
+
 
 /*
         PREVERI ALI JE TIMESTAMP VELJAVEN
@@ -282,34 +248,27 @@ const isValidTimestamp = (newBlock: Block, previousBlock: Block): boolean => {
         && newBlock.timestamp - 60 < getCurrentTimestamp();
 };
 
-const hasValidHash = (block: Block): boolean => {
 
-    if (!hashMatchesBlockContent(block)) {
+
+const hasValidHashWithoutDifficulty = (block: Block): boolean => {
+
+    if (!hashMatchesBlockContentWithoutDifficulty(block)) {
         console.log('invalid hash, got:' + block.hash);
         return false;
     }
 
-    if (!hashMatchesDifficulty(block.hash, block.difficulty)) {
-        console.log('block difficulty not satisfied. Expected: ' + block.difficulty + 'got: ' + block.hash);
-    }
     return true;
 };
 
-const hashMatchesBlockContent = (block: Block): boolean => {
-    const blockHash: string = calculateHashForBlock(block);
+
+
+
+const hashMatchesBlockContentWithoutDifficulty = (block: Block): boolean => {
+    const blockHash: string = calculateHashForBlockWithoutDifficulty(block);
     return blockHash === block.hash;
 };
 
-/*
-        PREVERI ALI SE HASH UJEMA GLEDA NA TEŽAVNOST
-        TEŽAVNOST: število 0 na začetku
-        PRIMER: dif=5 --> 00000.....
-*/
-const hashMatchesDifficulty = (hash: string, difficulty: number): boolean => {
-    const hashInBinary: string = hexToBinary(hash);
-    const requiredPrefix: string = '0'.repeat(difficulty);
-    return hashInBinary.startsWith(requiredPrefix);
-};
+
 
 /*
     PREVERI ALI JE PODAN BLOCKCHAIN VELJAVEN,
@@ -386,16 +345,14 @@ const addBlockToChain = (newBlock: Block): boolean => {
     return false;
 };
 
-/*
-        ZAMENJAJ VERIGO ZA TISTO Z VIŠJO SKUPNO TEŽAVNOSTJO
-*/
-const replaceChain = (newBlocks: Block[]) => {
+
+
+const replaceChainWithoutDifficulty = (newBlocks: Block[]) => {
     const tupleUnspent = isValidChain(newBlocks);
     const aUnspentTxOuts = tupleUnspent[0];
     const aUnspentTxOutsVictoryPoints = tupleUnspent[1];
     const validChain: boolean = aUnspentTxOuts !== null && aUnspentTxOutsVictoryPoints !== null;
-    if (validChain &&
-        getAccumulatedDifficulty(newBlocks) > getAccumulatedDifficulty(getBlockchain())) {
+    if (validChain) {
         console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
         blockchain = newBlocks;
         setUnspentTxOuts(aUnspentTxOuts);
@@ -420,7 +377,7 @@ export {
     Block, getBlockchain, getUnspentTxOuts, getLatestBlock, sendTransaction,
     generateRawNextBlock, generateNextBlock, generatenextBlockWithTransaction,
     handleReceivedTransaction, getMyUnspentTransactionOutputs,
-    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain,
+    getAccountBalance, isValidBlockStructure, replaceChainWithoutDifficulty, addBlockToChain,
     getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints, getAccountBalanceVictoryPoints,
     handleReceivedTransactionVictoryPoints
 };

@@ -1,5 +1,6 @@
 import * as  bodyParser from 'body-parser';
 import * as express from 'express';
+var os = require('os');
 
 import {
     Block, generateNextBlock, generatenextBlockWithTransaction, generateRawNextBlock, getAccountBalance,
@@ -7,7 +8,7 @@ import {
     getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints,
     getAccountBalanceVictoryPoints
 } from './blockchain';
-import {connectToPeers, getSockets, initP2PServer} from './p2p';
+import {connectToPeers, getSockets, initP2PServer, setMasterSocket} from './p2p';
 import {UnspentTxOut} from './transaction';
 import {getTransactionPool} from './transactionPool';
 import {getTransactionPoolVictoryPoints} from './transactionPoolVictoryPoints';
@@ -16,6 +17,35 @@ import * as _ from 'lodash';
 
 const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
 const p2pPort: number = parseInt(process.env.P2P_PORT) || 6001;
+const masterport: number = parseInt(process.env.MASTER) || 6001;
+
+
+const isAuthorized = () => {
+    if (process.env.AUTH=='True'||process.env.AUTH=='true'||process.env.AUTH=='TRUE') {
+        return true;
+    }
+    return false;
+};
+
+const isMaster = () => {
+    if (masterport == p2pPort/*process.env.MASTER=='True'||process.env.MASTER=='true'||process.env.MASTER=='TRUE'*/) {
+        return true;
+    }
+    return false;
+};
+
+const getMaster = () => {
+    return(masterport);
+};
+
+
+setMasterSocket();
+
+const getMyPort = () => {
+    return httpPort;
+};
+
+
 
 const initHttpServer = (myHttpPort: number) => {
     const app = express();
@@ -186,7 +216,7 @@ const initHttpServer = (myHttpPort: number) => {
     });
 
     app.get('/peers', (req, res) => {
-        res.send(getSockets().map((s: any) => s._socket.remoteAddress + ':' + s._socket.remotePort));
+        res.send(getSockets().map((s: any) => s._socket.remoteAddress + ':' + s._socket.remotePort + "\n"/*os.EOL*/));
     });
     app.post('/addPeer', (req, res) => {
         connectToPeers(req.body.peer);
@@ -199,10 +229,14 @@ const initHttpServer = (myHttpPort: number) => {
     });
 
     app.listen(myHttpPort, () => {
-        console.log('Listening http on port: ' + myHttpPort);
+        console.log('Listening http on port: ' + myHttpPort + '\n');
     });
 };
 
 initHttpServer(httpPort);
 initP2PServer(p2pPort);
+
+
 initWallet();
+
+export {isAuthorized, isMaster, getMyPort, getMaster};

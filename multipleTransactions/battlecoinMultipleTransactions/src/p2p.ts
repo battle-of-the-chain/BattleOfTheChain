@@ -2,13 +2,28 @@ import * as WebSocket from 'ws';
 import {Server} from 'ws';
 import {
     addBlockToChain, Block, getBlockchain, getLatestBlock, handleReceivedTransaction, isValidBlockStructure,
-    replaceChain, handleReceivedTransactionVictoryPoints
+    replaceChainWithoutDifficulty, handleReceivedTransactionVictoryPoints
 } from './blockchain';
 import {Transaction} from './transaction';
 import {getTransactionPool} from './transactionPool';
 import {getTransactionPoolVictoryPoints} from './transactionPoolVictoryPoints';
+import {isAuthorized, isMaster, getMyPort, getMaster} from './main';
 
+//GLOBALS
 const sockets: WebSocket[] = [];
+var potential_chain: Block[];
+var consentNum = 0;
+var consentReceived = 0;
+var masterSocket;
+var consent = false;
+
+
+const setMasterSocket = () => {
+    var socket='ws://localhost:'+getMaster();
+    console.log("Ayy: "+socket);
+    masterSocket = new WebSocket(socket);
+};
+//_______
 
 enum MessageType {
     QUERY_LATEST = 0,
@@ -196,7 +211,7 @@ const handleBlockchainResponse = (receivedBlocks: Block[]) => {
             broadcast(queryAllMsg());
         } else {
             console.log('Received blockchain is longer than current blockchain');
-            replaceChain(receivedBlocks);
+            replaceChainWithoutDifficulty(receivedBlocks);
         }
     } else {
         console.log('received blockchain is not longer than received blockchain. Do nothing');
@@ -224,4 +239,5 @@ const broadCastTransactionPool = () => {
 const broadCastTransactionPoolVictoryPoints = () => {
     broadcast(responseTransactionPoolVictoryPointsMsg());
 };
-export {connectToPeers, broadcastLatest, broadCastTransactionPool, initP2PServer, getSockets, broadCastTransactionPoolVictoryPoints};
+
+export {connectToPeers, broadcastLatest, broadCastTransactionPool, initP2PServer, getSockets, broadCastTransactionPoolVictoryPoints, setMasterSocket};

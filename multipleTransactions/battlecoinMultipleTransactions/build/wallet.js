@@ -27,6 +27,7 @@ exports.generatePrivateKey = generatePrivateKey;
 const initWallet = () => {
     // let's not override existing private keys
     if (fs_1.existsSync(privateKeyLocation)) {
+        console.log("You already have a private key, so none created");
         return;
     }
     const newPrivateKey = generatePrivateKey();
@@ -44,6 +45,10 @@ exports.deleteWallet = deleteWallet;
       BALANCE ZA CURRENCY
 */
 const getBalance = (address, unspentTxOuts) => {
+    console.log("Address: " + address + "Uspent txOuts" + JSON.stringify(unspentTxOuts, null, 2));
+    console.log(_(findUnspentTxOuts(address, unspentTxOuts))
+        .map((uTxO) => uTxO.amount)
+        .sum());
     return _(findUnspentTxOuts(address, unspentTxOuts))
         .map((uTxO) => uTxO.amount)
         .sum();
@@ -53,6 +58,10 @@ exports.getBalance = getBalance;
       BALANCE ZA VICTORY POINTS
 */
 const getBalanceVictoryPoints = (address, unspentTxOuts) => {
+    console.log("Address: " + address + "Uspent txOuts" + JSON.stringify(unspentTxOuts, null, 2));
+    console.log(_(findUnspentTxOutsVictoryPoints(address, unspentTxOuts))
+        .map((uTxO) => uTxO.amount)
+        .sum());
     return _(findUnspentTxOutsVictoryPoints(address, unspentTxOuts))
         .map((uTxO) => uTxO.amount)
         .sum();

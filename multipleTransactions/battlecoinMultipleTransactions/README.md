@@ -1,44 +1,33 @@
-
-
+##### AUTHORIZED 1 --> MASTER 
 ```
-npm install
-npm start
+AUTH=true MASTER=6001 npm start
 ```
-
-##### Get blockchain
+#### AUTHORIZED 2
 ```
-curl http://localhost:3001/blocks
+AUTH=true MASTER=6001 HTTP_PORT=3002 P2P_PORT=6002 PRIVATE_KEY=75d8efd17cc4e21934e9b084cdde851f457377e0d6eff18cf65eb7a31c38a778 npm start
 ```
-
-##### Mine a block
+#### AUTHORIZED 3
 ```
-curl -X POST http://localhost:3001/mineBlock
-``` 
-
-##### Send transaction
-```
-curl -H "Content-type: application/json" --data '{"address": "04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534b", "amount" : 35}' http://localhost:3001/sendTransaction
+AUTH=true MASTER=6001 HTTP_PORT=3003 P2P_PORT=6003 PRIVATE_KEY=75d8efd17cc4e21934e9b084cdde851f457377e0d6eff18cf65eb7a31c38a776 npm start
 ```
 
-##### Query transaction pool
+#### NON-AUTHORIZED 1
 ```
-curl http://localhost:3001/transactionPool
-```
-
-##### Mine transaction
-```
-curl -H "Content-type: application/json" --data '{"address": "04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534b", "amount" : 35}' http://localhost:3001/mineTransaction
+MASTER=6001 HTTP_PORT=3004 P2P_PORT=6004 PRIVATE_KEY=75d8efd17cc4e21934e9b084cdde851f457377e0d6eff18cf65eb7a31c38a775 npm start
 ```
 
-##### Get balance
+#### NON-AUTHORIZED 2
 ```
-curl http://localhost:3001/balance
+MASTER=6001 HTTP_PORT=3005 P2P_PORT=6005 PRIVATE_KEY=75d8efd17cc4e21934e9b084cdde851f457377e0d6eff18cf65eb7a31c38a774 npm start
 ```
-##### Add peer
+
+#### Send transaction
 ```
-curl -H "Content-type:application/json" --data '{"peer" : "ws://localhost:6001"}' http://localhost:3001/addPeer
+curl -H "Content-type: application/json" --data '{"address": "04f04ba012ac1a1f7c195dce22dab29c915721bfaccc0ee8e895505ef1fb22971b13c85dc0108bad29c4d72c3eb31854c684128c6332a54450c729187c6faaa698", "amount" : 35}' http://localhost:3002/sendTransaction
 ```
-#### Query connected peers
+
+
+#### Mine transaction
 ```
-curl http://localhost:3001/peers
+curl -H "Content-type: application/json" --data '{"address": "04f04ba012ac1a1f7c195dce22dab29c915721bfaccc0ee8e895505ef1fb22971b13c85dc0108bad29c4d72c3eb31854c684128c6332a54450c729187c6faaa698", "amount" : 35}' http://localhost:3002/mineTransaction
 ```

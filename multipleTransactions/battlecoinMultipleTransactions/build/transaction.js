@@ -270,7 +270,7 @@ const updateUnspentTxOuts = (aTransactions, aUnspentTxOuts) => {
         .reduce((a, b) => a.concat(b), [])
         .map((txIn) => new UnspentTxOut(txIn.txOutId, txIn.txOutIndex, '', 0));
     /*
-            NOVE PREOSTALE NEPOTJENE TRANSAKCIJE
+            NOVE PREOSTALE NEPOTRJENE TRANSAKCIJE
     */
     const resultingUnspentTxOuts = aUnspentTxOuts
         .filter(((uTxO) => !findUnspentTxOut(uTxO.txOutId, uTxO.txOutIndex, consumedTxOuts)))
