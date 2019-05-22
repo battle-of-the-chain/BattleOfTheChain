@@ -1,0 +1,31 @@
+CONTRACT START(participant1, item1, ammount1)
+{
+	result = 0;
+	if(ITEMCOUNT(participant1, item1)==0 && GETROUND() ==0)
+	{
+		ITEMADD(participant1, item1, ammount1);
+		result=1;
+	}
+}
+
+CONTRACT GIVE(participant1, item1, ammount1)
+{
+	result = 0;
+	if(GETROUND() > 0)
+	{
+		ITEMADD(participant1, item1, ammount1);
+		result=1;
+	}
+}
+CONTRACT TRADE(participant1, item1, ammount1, participant2, item2, ammount2)
+{
+	result = 0;
+	if(ITEMCOUNT(participant1, item1) >= ammount1 && ITEMCOUNT(participant2, item2) >= ammount2)
+	{
+		ITEMADD(participant1, item2, ammount2);
+		ITEMSUB(participant1, item1, ammount1);
+		ITEMADD(participant2, item1, ammount1);
+		ITEMSUB(participant2, item2, ammount2);
+		result=1;
+	}
+}
