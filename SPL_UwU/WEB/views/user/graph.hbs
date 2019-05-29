@@ -1,0 +1,378 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-12" style="background-color:navy-blue" >
+			<div style="width:70%">
+				<canvas id="myChart"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script>
+	var dates = [];
+	var items = [];
+
+</script>
+
+{{#each this}}
+	{{#if user}}
+	<script>
+		var cur = '{{currency}}';
+		var usr = '{{user}}';
+		var pri = '{{price}}';
+		var amnt = '{{amount}}';
+		var tm = '{{time}}';
+		
+		var item = {
+			currency:cur,
+			user:usr,
+			price:pri,
+			amount:amnt,
+			time:tm
+		};
+		items.push(item);
+		
+		//dates.push({{time}});
+	</script>
+	{{/if}}
+{{/each}}
+
+
+<script>
+	var dataVictory = [];
+	var dataCash = [];
+	var now = new Date();
+	var first = new Date((now.getTime() - (24*60*60*1000) * 1));
+	var second = new Date((now.getTime() - (24*60*60*1000) * 2));
+	var third = new Date((now.getTime() - (24*60*60*1000) * 3));
+	var fourth = new Date((now.getTime() - (24*60*60*1000) * 4));
+	var dates = [now, first, second, third, fourth];
+	
+	var one = [];
+	var two = [];
+	var three = [];
+	var four = [];
+	var five = [];
+	
+
+	//debugger;
+	for(var i = 0; i < items.length; i++){
+		for(var j = 0; j < dates.length; j++){
+			var newDate = new Date(items[i].time);
+			//console.log("__"+newDate.getDate()+"__");
+			if(newDate.getDate() == dates[j].getDate()){//match in date and entry
+				if(j == 0){
+					five.push(items[i]);
+				}
+				else if(j == 1){
+					four.push(items[i]);
+				}
+				else if(j == 2){
+					three.push(items[i]);
+				}
+				else if(j == 3){
+					two.push(items[i]);
+				}
+				else{
+					one.push(items[i]);
+				}
+			}
+		}
+	}
+
+	
+	var prvi;
+	var drugi;
+	var tretji;
+	var cetrti;
+	var peti;
+	
+	var prviV;
+	var drugiV;
+	var tretjiV;
+	var cetrtiV;
+	var petiV;
+
+	
+	if(one.length == 0){
+		dataCash.push(0.5);
+		dataVictory.push(0.5);
+	}
+	else{
+		var Vcount = 0
+		var count = 0;
+		var avg = 0;
+
+		var avgV = 0;
+		for(var i = 0; i < one.length; i++){
+			if(one[i].currency == "v_pts"){
+				avgV += (one[i].amount / one[i].price);
+				Vcount++;
+			}
+			else{
+				avg += (one[i].amount / one[i].price);
+				count++;
+			}
+		}
+		if(count == 0){
+			avg = 1;
+		}
+		else{
+			avg = avg / count;
+		}
+		if(Vcount == 0){
+			avgV = 1;
+		}
+		else{
+			avgV = avgV / Vcount;
+		}
+		prvi = avg;
+		prviV = avgV;
+		//TODO push
+		dataCash.push(avg);
+		dataVictory.push(avgV);
+
+		
+	}
+	
+	
+	if(two.length == 0){
+		dataCash.push(0.5);
+		dataVictory.push(0.5);
+	}
+	else{
+		console.log("v two");
+		var Vcount = 0
+		var count = 0;
+		var avg = 0;
+		var avgV = 0;
+		for(var i = 0; i < two.length; i++){
+			if(two[i].currency == "v_pts"){
+				avgV += (two[i].amount / two[i].price);
+				Vcount++;
+			}
+			else{
+				avg += (two[i].amount / two[i].price);
+				count++;
+			}
+		}
+		if(count == 0){
+			avg = 1;
+		}
+		else{
+			avg = avg / count;
+		}
+		if(Vcount == 0){
+			avgV = 1;
+		}
+		else{
+			avgV = avgV / Vcount;
+		}
+		drugi = avg;
+		drugiV = avgV;
+		//TODO push	
+		
+		dataCash.push(avg);
+		dataVictory.push(avgV);		
+	}
+	
+	
+	if(three.length == 0){	
+		dataCash.push(0.5);
+		dataVictory.push(0.5);
+	}
+	else{
+		var Vcount = 0
+		var count = 0;
+		var avg = 0;
+		var avgV = 0;
+		for(var i = 0; i < three.length; i++){
+			if(three[i].currency == "v_pts"){
+				avgV += (three[i].amount / three[i].price);
+				Vcount++;
+			}
+			else{
+				avg += (three[i].amount / three[i].price);
+				count++;
+			}
+		}
+		if(count == 0){
+			avg = 1;
+		}
+		else{
+			avg = avg / count;
+		}
+		if(Vcount == 0){
+			avgV = 1;
+		}
+		else{
+			avgV = avgV / Vcount;
+		}
+		tretji = avg;
+		tretjiV = avgV;
+		
+		dataCash.push(avg);
+		dataVictory.push(avgV);		
+	}
+	
+	
+	if(four.length == 0){ // vcerej
+		dataCash.push(0.5);
+		dataVictory.push(0.5);		
+	}
+	else{
+		var Vcount = 0
+		var count = 0;
+		var avg = 0;
+		var avgV = 0;
+		for(var i = 0; i < four.length; i++){
+			if(four[i].currency == "v_pts"){
+				avgV += (four[i].amount / four[i].price);
+				Vcount++;
+			}
+			else{
+				avg += (four[i].amount / four[i].price);
+				count++;
+			}
+		}
+		if(count == 0){
+			avg = 1;
+		}
+		else{
+			avg = avg / count;
+		}
+		if(Vcount == 0){
+			avgV = 1;
+		}
+		else{
+			avgV = avgV / Vcount;
+		}
+		cetrti = avg;
+		cetrtiV = avgV;	
+
+		dataCash.push(avg);
+		dataVictory.push(avgV);		
+	}
+	
+	
+	if(five.length == 0){//danes
+		dataCash.push(0.5);
+		dataVictory.push(0.5);
+	}
+	else{
+		var Vcount = 0
+		var count = 0;
+		var avg = 0;
+		var avgV = 0;
+		for(var i = 0; i < five.length; i++){
+			if(five[i].currency == "v_pts"){
+				avgV += (five[i].amount / five[i].price);
+				Vcount++;
+			}
+			else{
+				avg += (five[i].amount / five[i].price);
+				count++;
+			}
+		}
+		if(count == 0){
+			avg = 1;
+		}
+		else{
+			avg = avg / count;
+		}
+		if(Vcount == 0){
+			avgV = 1;
+		}
+		else{
+			avgV = avgV / Vcount;
+		}
+		peti = avg;
+		petiV = avgV;
+
+		dataCash.push(avg);
+		dataVictory.push(avgV);
+	}
+	
+
+
+	var ctx = document.getElementById('myChart');
+	var myChart = new Chart(ctx, {
+		type: 'line',
+		data: {
+			labels: [fourth.getDate()+'.'+fourth.getMonth(), third.getDate()+'.'+third.getMonth(), second.getDate()+'.'+second.getMonth(),first.getDate()+'.'+first.getMonth(), now.getDate()+'.'+now.getMonth()],
+			datasets: [{
+				label: 'Cash : V. pts',
+				//data: [12, 19, 3, 5, 2, 3],
+				data: dataCash,
+				borderColor: [
+					'red',
+				],
+				borderWidth: 1,
+
+				pointBorderColor: [
+					'red'
+				],
+				pointBackgroundColor:[
+					'red'
+				],
+			},{
+				label: 'V. pts : cash',
+				//data: [3, 2, 1, 5, 7, 3],
+				data: dataVictory,
+				borderColor: [
+					'yellow',
+				],
+				pointBorderColor: [
+					'yellow'
+				],
+				pointBackgroundColor:[
+					'yellow'
+				],
+				borderWidth: 1
+				
+
+			}
+			]
+		},
+
+		options: {
+			legend: {
+				display: true,
+				labels: {
+					fontColor: '#CCC'
+				}
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						beginAtZero: true,
+						fontColor: "#CCC", // this here
+					}
+				}],
+				xAxes: [{ 
+					ticks: {
+					  fontColor: "#CCC", // this here
+					},
+				}],
+			}
+		}
+	});
+    
+
+
+
+
+	$.get( "/entries", function( data ) {
+		$( "#entry_section" ).html( data );
+	});
+	
+	
+	//console.log(dataCash);
+	//console.log(dataVictory);
+	//console.log(items);
+	
+</script>

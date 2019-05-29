@@ -1,0 +1,61 @@
+
+
+<hr style="width:90%" />
+
+	  <div class="row">
+		<div class="col-xs-3" style="color:white">
+			<h4>Currency:</h4>
+		</div>
+		<div class="col-xs-3" style="color:white">
+			<h4>User:</h4>
+		</div>
+		<div class="col-xs-3" style="color:white">
+			<h4>Price:</h4>
+		</div>
+		<div class="col-xs-3" style="color:white">
+			<h4>Amount:</h4>
+		</div>
+	  </div>
+
+
+
+
+{{#each this}}
+	{{#if user}}
+
+	  <div class="row">
+		<div class="col-xs-3" style="background-color:#33cc33;">
+			<h5>{{currency}}</h5>
+		</div>
+		<div class="col-xs-3" style="background-color:white;">
+			<h5>{{user}}</h5>
+		</div>
+		<div class="col-xs-3" style="background-color:#33cc33;">
+			<h5>{{price}}</h5>
+		</div>
+		<div class="col-xs-2" style="background-color:white;">
+			<h5>{{amount}}</h5>
+		</div>
+		<div style="display:none">
+			<h5 class="time">{{time}}</h5>
+		</div>
+		<div style="display:none">
+			<h5 class="bs">{{buy_sell}}</h5>
+		</div>
+		<div>
+			<form action="/entries/trade" method="post">
+				<input type="hidden" name="price" value="{{price}}"/>
+				<input type="hidden" name="amount" value="{{amount}}"/>
+				<input type="hidden" name="offer" value="{{_id}}"/>
+				<input type="hidden" name="address" value="{{user_public}}">
+				<input type="submit"  class="btn btn-success subm" value="Accept"/>
+			</form>
+		</div>
+	  </div>
+
+	{{/if}}
+{{/each}}
+
+
+
+

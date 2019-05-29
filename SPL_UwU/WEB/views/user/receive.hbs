@@ -1,0 +1,100 @@
+
+<ul class="nav" style="position:absolute;left:0px">
+  <!-- <li class="nav-item"> -->
+    <!-- <a class="nav-link" href="/users/index">Dashboard</a> -->
+  <!-- </li> -->
+  <li class="nav-item">
+    <a class="nav-link" href="/users/profile">Profile</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/users/market">Market</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/users/send">Send</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link disabled" href="/users/receive">Console</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link disabled" href="/users/logout">Log out</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/questions/">Forums</a>
+  </li>
+</ul>
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-4">
+			<form action="/users/mine" method="post">
+				<input type="text" name="socket" value="6001" placeholder="socket" />
+				<input type="submit"  class="btn btn-success subm" value="MINE BLOCK"/>
+			</form>
+		</div>
+		<div class="col-md-4" >
+			<form action="/users/getBalance" method="post">
+				<input type="text" name="socket" value="6001" placeholder="socket" />
+				<input type="submit" class="btn btn-success subm" value="GET BALANCE"/>
+			</form>
+		</div>
+		<div class="col-md-4" >
+			<form action="/users/getBalanceVictory" method="post">
+				<input type="text" name="socket" value="6001" placeholder="socket" />
+				<input type="submit" class="btn btn-success subm" value="GET BALANCE (V)"/>
+			</form>
+		</div>
+	</div>
+	<br/>
+	<div class="row">
+		<div class="col-md-4">
+			<form action="/users/mineTransaction" method="post">
+				<input type="text" name="socket" placeholder="socket" value="6001" /><br/>
+				<input type="text" name="address" placeholder="address" /><br/>
+				<input type="text" name="amount" placeholder="amount" />
+				<input type="submit" class="btn btn-success subm" value="MINE TRANSACTION"/>
+			</form>
+		</div>
+		<div class="col-md-4" >
+			<form action="/users/blocks" method="post">
+				<input type="text" name="socket" value="6001" placeholder="socket" />
+				<input type="submit" class="btn btn-success subm" value="QUERY BLOCKS"/>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="container">
+
+	<div id="scrollable" style="margin-top:10px; background-color:black; width:95%; height:300px; overflow-y: scroll; padding:10px; color:limegreen; word-break: break-all;">
+		<p id="console">Console <br></p>
+	</div>
+
+</div>
+<!-- <form action="/users/mine" method="post"> -->
+	<!-- <input type="text" name="socket" /> -->
+	<!-- <input type="text" name="to_username"> -->
+	<!-- <input type="submit"  class="btn btn-success subm" value="TRANSACTION"/> -->
+<!-- </form> -->
+
+
+<script>
+	function fetchText() {
+		document.getElementById("console").innerHTML = document.getElementById("console").innerHTML + "<br/>" + "text2";
+		var objDiv = document.getElementById("scrollable");
+		objDiv.scrollTop = objDiv.scrollHeight;
+
+	}
+	
+	$( document ).ready(function() {
+		$.get( "/photos/", function( data ) {
+			$( "#console" ).html( data );
+			var objDiv = document.getElementById("scrollable");
+			objDiv.scrollTop = objDiv.scrollHeight;
+		});
+	});
+	
+
+</script>
+
+
+
