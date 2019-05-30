@@ -1,0 +1,10 @@
+﻿  Source.cpp
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(6): error C2065: 'ifstream': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(6): error C2146: syntax error: missing ';' before identifier 'datoteka'
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(6): error C2065: 'datoteka': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(7): error C2065: 'datoteka': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(21): error C2065: 'cout': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(21): error C2065: 'endl': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(24): error C2065: 'cout': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(24): error C2065: 'endl': undeclared identifier
+c:\users\urban\documents\vsprojects\ppjv14\ppjv14\source.cpp(29): error C2065: 'datoteka': undeclared identifier

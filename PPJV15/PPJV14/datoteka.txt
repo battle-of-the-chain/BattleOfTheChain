@@ -1,0 +1,51 @@
+CONTRACT START(participant1, gold, amount1)
+{
+	result = 0;
+	if(ITEMCOUNT(participant1, gold)==0 && GETROUND() == 0)
+	{
+		ITEMADD(participant1, gold, amount1);
+		result=1;
+	}
+}
+
+CONTRACT START(participant1, gold, amount1)
+{
+	result = 0;
+	if(ITEMCOUNT(participant1, gold)==0 && GETROUND() == 0)
+	{
+		ITEMADD(participant1, gold, amount1);
+		result=1;
+	}
+}
+
+CONTRACT START(participant2, rocks, amount10)
+{
+	result = 0;
+	if(ITEMCOUNT(participant2, rocks)==0 && GETROUND() == 0)
+	{
+		ITEMADD(participant2, rocks, amount10);
+		result=1;
+	}
+}
+
+CONTRACT GIVE(participant1, item1, amount1)
+{
+	result = 0;
+	if(GETROUND() > 0)
+	{
+		ITEMADD(participant1, item1, amount1);
+		result=1;
+	}
+}
+CONTRACT TRADE(participant1, item1, amount1, participant2, item2, ammount2)
+{
+	result = 0;
+	if(ITEMCOUNT(participant1, gold) >= amount1 && ITEMCOUNT(participant2, rocks) >= amount1)
+	{
+		ITEMADD(participant1, rocks, amount1);
+		ITEMSUB(participant1, gold, amount1);
+		ITEMADD(participant2, gold, amount1);
+		ITEMSUB(participant2, rocks, amount1);
+		result=1;
+	}
+}
