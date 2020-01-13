@@ -79,6 +79,14 @@ class Transaction {
     public txOuts: TxOut[];
 }
 
+class TransactionGame {
+
+    public id: string;
+
+    public txIns: TxIn[];
+    public txOuts: TxOut[];
+}
+
 /*
         ID TRANSAKCIJE JE IZRAČUNAN IZ HASHA VSEBINE TRANSAKCIJE
         (brez podpisa txId-jev, ker se ta doda kasneje v transakciji)
@@ -438,5 +446,5 @@ const isValidAddress = (address: string): boolean => {
 export {
     processTransactions, signTxIn, getTransactionId, isValidAddress, validateTransaction,
     UnspentTxOut, TxIn, TxOut, getCoinbaseTransaction, getPublicKey, hasDuplicates,
-    Transaction
+    Transaction, TransactionGame
 };

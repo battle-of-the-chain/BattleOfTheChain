@@ -3,7 +3,7 @@ import * as express from 'express';
 
 import {
     Block, generateNextBlock, generatenextBlockWithTransaction, generateRawNextBlock, getAccountBalance,
-    getBlockchain, getMyUnspentTransactionOutputs, getUnspentTxOuts, sendTransaction,
+    getBlockchain, getMyUnspentTransactionOutputs, getUnspentTxOuts, sendTransaction, getLatestBlock,
     /*getUnspentTxOutsVictoryPoints, getMyUnspentTransactionOutputsVictoryPoints, sendTransactionVictoryPoints,
     getAccountBalanceVictoryPoints*/
 } from './blockchain';
@@ -31,6 +31,20 @@ const initHttpServer = (myHttpPort: number) => {
 
     app.get('/blocks', (req, res) => {
         res.send(JSON.stringify(getBlockchain(), null, 2));
+    });
+
+    app.get('/lastBlock', (req, res) => {
+        res.send(JSON.stringify(getLatestBlock(), null, 2));
+    });
+
+    app.get('/lastBlockGame', (req, res) => {
+        var newBlock=getLatestBlock();
+        var bc = JSON.parse(JSON.stringify(newBlock, null, 2));
+        var turndata = bc.data[0].txOuts[0].currency.split("|", 3);
+
+        bc.data = {"player":turndata[0], "pos":"e"};
+        bc.data.pos = {"x": parseInt(turndata[1]), "y": parseInt(turndata[2])};
+        res.send(JSON.stringify(bc, null, 2));
     });
 
     app.get('/transaction/:id', (req, res) => {
@@ -110,6 +124,31 @@ const initHttpServer = (myHttpPort: number) => {
         } else {
             res.send(JSON.stringify(newBlock, null, 2)); //JSON.stringify(obj, null, 2);  res.send(newBlock);
         }
+    });
+
+    app.post('/mineBlockGame', (req, res) => {
+      if(!req.body.player){
+        res.send('player parameter is missing or invalid (valid names are "black" and "white")');
+      }else if(!req.body.pos){
+        res.send('position parameter is missing');
+      }else if(!req.body.pos.x){
+        res.send('x position parameter is missing\n'+JSON.stringify(req.body, null, 2));
+      }else if(!req.body.pos.y){
+        res.send('y position parameter is missing');
+      }
+      const curr = ""+req.body.player+"|"+req.body.pos.x+"|"+req.body.pos.y;
+      const newBlock: Block = generateNextBlock(curr);
+      var bc = JSON.parse(JSON.stringify(newBlock, null, 2));
+      if (newBlock === null) {
+          res.status(400).send('could not generate block');
+      } else {
+        var turndata = bc.data[0].txOuts[0].currency.split("|", 3);
+        bc.data = {"player":turndata[0], "pos":"e"};
+        bc.data.pos = {"x": parseInt(turndata[1]), "y": parseInt(turndata[2])};
+
+
+        res.send(JSON.stringify(bc, null, 2)); //JSON.stringify(obj, null, 2);  res.send(newBlock);
+      }
     });
 
     /*

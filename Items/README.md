@@ -1,7 +1,19 @@
 ##### Vse komande
 ```
-So v comds.txt
+So v cmds.txt
 ```
+
+#### More new
+
+```
+curl http://localhost:3001/lastBlock
+
+curl -H "Content-type:application/json" --data '{"player": "white", "pos":{"x":2, "y": 3}}' http://localhost:3001/mineBlockGame
+
+```
+
+
+
 
 #### New
 ```

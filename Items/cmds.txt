@@ -20,6 +20,7 @@ se mi je pa zdel, da sm nekje vidu, da če je samo v eni vrstici vse, da loh tko
 
 
 curl http://localhost:3001/blocks
+curl http://localhost:3001/lastBlock
 
 curl -H "Content-type:application/json" --data '{"peer" : "ws://localhost:6001"}' http://localhost:3001/addPeer
 curl -H "Content-type:application/json" --data '{"peer" : "ws://localhost:6002"}' http://localhost:3001/addPeer
@@ -45,6 +46,9 @@ curl -H "Content-type: application/json" --data '{"address": "04d9cd3271b4e98869
 curl -H "Content-type:application/json" --data '{"currency" : "INSERT CURRENCY NAME HERE"}' http://localhost:3001/mineBlock
 curl -H "Content-type:application/json" --data '{"currency" : "INSERT CURRENCY NAME HERE"}' http://localhost:3001/balance
 curl http://localhost:3001/balanceAll
+
+curl -H "Content-type:application/json" --data '{"player": "white", "pos":{"x":2, "y": 3}}' http://localhost:3001/mineBlockGame
+
 
 curl -H "Content-type:application/json" --data '{"currency" : "INSERT CURRENCY NAME HERE"}' http://localhost:3001/unspentTransactionOutputs
 curl http://localhost:3001/balanceAll

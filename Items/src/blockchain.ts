@@ -2,7 +2,7 @@ import * as CryptoJS from 'crypto-js';
 import * as _ from 'lodash';
 import {broadcastLatest, broadCastTransactionPool/*, broadCastTransactionPoolVictoryPoints*/} from './p2p';
 import {
-    getCoinbaseTransaction, isValidAddress, processTransactions, Transaction, UnspentTxOut
+    getCoinbaseTransaction, isValidAddress, processTransactions, Transaction, UnspentTxOut, TransactionGame
 } from './transaction';
 /*import {
     getCoinbaseTransactionVictoryPoints, isValidAddressVictoryPoints, processTransactionsVictoryPoints, TransactionVictoryPoints, UnspentTxOutVictoryPoints
@@ -15,6 +15,8 @@ import {createTransaction, findUnspentTxOuts, getBalance, getPrivateFromWallet, 
 
 // RAZRED ZA BLOCK V BLOCKCHAINU
 class Block {
+
+
 
     public index: number;
     public hash: string;
@@ -92,7 +94,7 @@ const setUnspentTxOuts = (newUnspentTxOut: UnspentTxOut[]) => {
 
 
 
-const getLatestBlock = (): Block => blockchain[blockchain.length - 1];
+const getLatestBlock = (): Block => _.cloneDeep(blockchain[blockchain.length - 1]);
 
 /*
         KONSTANTA KI DOLOČA NA KOLIKO ČASA SE LAHKO USTVARI NOV BLOCK:
@@ -146,7 +148,20 @@ const generateRawNextBlock = (blockData: Transaction[]/*, blockDataVictory: Tran
     } else {
         return null;
     }
+};
 
+const generateRawNextBlockGame = (blockData: Transaction[]/*, blockDataVictory: TransactionVictoryPoints[]*/) => {
+    const previousBlock: Block = getLatestBlock();
+    const difficulty: number = getDifficulty(getBlockchain());
+    const nextIndex: number = previousBlock.index + 1;
+    const nextTimestamp: number = getCurrentTimestamp();
+    const newBlock: Block = findBlockGame(nextIndex, previousBlock.hash, nextTimestamp, blockData/*, blockDataVictory*/, difficulty);
+    if (addBlockToChain(newBlock)) {
+        broadcastLatest();
+        return newBlock;
+    } else {
+        return null;
+    }
 };
 
 // gets the unspent transaction outputs owned by the wallet
@@ -160,6 +175,23 @@ const getMyUnspentTransactionOutputs = () => {
 
 //USTVARI NASLEDNJI BLOCK S PREMOŽENJEM(VALUTO)
 const generateNextBlock = (currency: string) => {
+//maybe
+
+    console.log("Inside generateNextBlock");
+    const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1, currency);
+    console.log("COINBASE TX" + JSON.stringify(coinbaseTx, null, 2));
+    const blockData: Transaction[] = [coinbaseTx].concat(getTransactionPool());
+    console.log("blockData" + JSON.stringify(blockData, null, 2));
+    /*const coinbaseTxVictoryPoints: TransactionVictoryPoints = getCoinbaseTransactionVictoryPoints(getPublicFromWallet(), getLatestBlock().index + 1);
+    console.log("COINBASE TX VICTORY" + JSON.stringify(coinbaseTxVictoryPoints, null, 2));
+    const blockDataVictoryPoints: TransactionVictoryPoints[] = [coinbaseTxVictoryPoints].concat(getTransactionPoolVictoryPoints());
+    console.log("blockDataVictory" + JSON.stringify(blockDataVictoryPoints, null, 2));
+    console.log("transactionPoolVictoryPoints:" + JSON.stringify(getTransactionPoolVictoryPoints(), null, 2));*/
+    console.log("transactionPool:" + JSON.stringify(getTransactionPool(), null, 2));
+    return _.cloneDeep(generateRawNextBlock(blockData));
+};
+
+const generateNextBlockGame = (currency: string) => {
 //maybe
 
     console.log("Inside generateNextBlock");
@@ -210,6 +242,17 @@ const findBlock = (index: number, previousHash: string, timestamp: number, data:
     }
 };
 
+const findBlockGame = (index: number, previousHash: string, timestamp: number, data: Transaction[]/*, dataVictory: TransactionVictoryPoints[]*/, difficulty: number): Block => {
+    let nonce = 0;
+    while (true) {
+        const hash: string = calculateHashGame(index, previousHash, timestamp, data,/* dataVictory,*/ difficulty, nonce);
+        if (hashMatchesDifficulty(hash, difficulty)) {
+            return new Block(index, hash, previousHash, timestamp, data,/* dataVictory,*/ difficulty, nonce);
+        }
+        nonce++;
+    }
+};
+
 const getAccountBalance = (currency: string): number => {
     return getBalance(getPublicFromWallet(), getUnspentTxOuts(), currency);
 };
@@ -239,6 +282,11 @@ const calculateHashForBlock = (block: Block): string =>
     calculateHash(block.index, block.previousHash, block.timestamp, block.data, /*block.dataVictory,*/ block.difficulty, block.nonce);
 
 const calculateHash = (index: number, previousHash: string, timestamp: number, data: Transaction[], /*dataVictory: TransactionVictoryPoints[],*/
+                       difficulty: number, nonce: number): string =>
+    CryptoJS.SHA256(index + previousHash + timestamp + data /*+ dataVictory+ difficulty*/ + nonce).toString();
+
+
+const calculateHashGame = (index: number, previousHash: string, timestamp: number, data: TransactionGame[], /*dataVictory: TransactionVictoryPoints[],*/
                        difficulty: number, nonce: number): string =>
     CryptoJS.SHA256(index + previousHash + timestamp + data /*+ dataVictory+ difficulty*/ + nonce).toString();
 
